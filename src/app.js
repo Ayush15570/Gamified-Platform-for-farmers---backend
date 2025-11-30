@@ -38,4 +38,13 @@ app.use("/api/v1/crop",crop)
 
 import challenge from "./routes/dailyChallenge.route.js"
 app.use("/api/v1/challenge",challenge)
+
+import subscription from "./routes/subscription.router.js"
+app.use("/api/v1/subscription",subscription)
+
+import digitalProducts from "./routes/digitalProduct.router.js"
+app.use("/api/v1/products",digitalProducts)
+
+import aiIssue from "./routes/ai.routes.js"
+app.use("/api/v1/ai",aiIssue)
 export default app

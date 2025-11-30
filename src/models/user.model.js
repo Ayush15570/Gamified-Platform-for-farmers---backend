@@ -47,7 +47,13 @@ otpExpiry: {
 },
 refreshToken:{
         type:String
-    }
+},
+subscription:{
+    type:String,
+    enum:["free","vip"],
+    default:"free"
+}
+
    
 },{timestamps:true});
 

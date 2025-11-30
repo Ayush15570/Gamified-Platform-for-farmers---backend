@@ -7,12 +7,19 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
  
 export const reportCropIssue = asyncHandler(async (req, res) => {
+
+  if(req.user.subscription !== "vip"){
+    return res
+    .status(403)
+    .json(new ApiResponse(403,null,"Only VIP allowed"))
+  }
+
   const { description } = req.body;
 
   if (!description) {
     throw new ApiError(400, "Description is required");
   }
-
+ 
 
   const imageLocalPath = req.files?.image?.[0]?.path;
   if (!imageLocalPath) {

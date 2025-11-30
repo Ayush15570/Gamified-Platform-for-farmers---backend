@@ -4,6 +4,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import {User} from '../models/user.model.js'
 import  jwt from 'jsonwebtoken'
 import twilio from "twilio"
+import fast2sms from "fast-two-sms"
 const generateAccessAndRefereshTokens = async (userId) => {
     try {
 
@@ -34,6 +35,59 @@ const sendWhatsappOtp = async (phoneNumber, otp) => {
   }
 };
 
+// const sendSmsOtp = async (phoneNumber,otp) => {
+//     try {
+//         const response = await fast2sms.sendMessage({
+//              authorization: process.env.FAST2SMS_API_KEY,
+//       message: `Your OTP for registration is: ${otp}`,
+//       numbers: [phoneNumber],
+//         })
+        
+//     console.log("SMS OTP sent:", response);
+//     } catch (err) {
+//         console.error("Error sending SMS OTP:", err);
+//     throw new Error("Could not send OTP via SMS");
+//     }
+// }
+
+const demoLogin = asyncHandler(async(req,res) => {
+    const demoEmail = "demo@gmail.com";
+
+    let user = await User.findOne({ email:demoEmail})
+
+    if(!user) {
+        user = await User.create({
+            fullName:"Demo User",
+            email:demoEmail,
+            password:"Demo@123",
+            phoneNumber:"9999999999",
+            phoneVerified: true,
+            subscription:"vip"
+        })
+    }
+     const { accessToken, refreshToken } =
+    await generateAccessAndRefereshTokens(user._id);
+
+  const demoUser = await User.findById(user._id).select(
+    "-password -refreshToken"
+  );
+
+  const options = {
+    httpOnly: true,
+    secure: false,
+    sameSite: "lax",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  };
+
+  return res
+    .status(200)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .json(
+      new ApiResponse(200, { user: demoUser }, "Demo login successful")
+    );
+})
+
 const registerUser = asyncHandler(async(req,res)=>{
     const{fullName,email,password,phoneNumber} = req.body
     
@@ -53,6 +107,8 @@ const registerUser = asyncHandler(async(req,res)=>{
     const otpExpiry = new Date(Date.now() + 15 * 60 * 1000);
    // Send OTP via WhatsApp
 await sendWhatsappOtp(phoneNumber, otp);
+
+// await sendSmsOtp(phoneNumber,otp)
 
     const user = await User.create({
         fullName,
@@ -241,5 +297,6 @@ export {
     logout,
     refreshAccessToken,
     verifyPhone,
-    getCurrentUser
+    getCurrentUser,
+    demoLogin
 }
